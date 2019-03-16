@@ -83,6 +83,9 @@ public:
 
 	// gluLookAt equivalent
 	void lookAt(Vec3f eye, Vec3f at, Vec3f up);
+
+	Vec3f cross(Vec3f a, Vec3f b);
+	Vec3f normal(Vec3f a);
 };
 
 #endif
