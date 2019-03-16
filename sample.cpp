@@ -4,6 +4,7 @@
 #include "modelerapp.h"
 #include "modelerdraw.h"
 #include <FL/gl.h>
+#include "camera.h"
 
 #include "modelerglobals.h"
 
@@ -33,92 +34,95 @@ void SampleModel::draw()
 	// projection matrix, don't bother with this ...
     ModelerView::draw();
 
-	// draw the floor
-	setAmbientColor(.1f,.1f,.1f);
-	setDiffuseColor(COLOR_RED);
-	glPushMatrix();
-	glTranslated(-5,0,-5);
-	drawBox(10,0.01f,10);
-	glPopMatrix();
-
-
-
-	setAmbientColor(.1f, .1f, .1f);
-	setDiffuseColor(COLOR_GREEN);
-	glPushMatrix();
-	glTranslated(VAL(XPOS), VAL(YPOS),VAL(ZPOS));
-	//draw the troso
+		// draw the floor
+		
+		setAmbientColor(.1f,.1f,.1f);
+		setDiffuseColor(COLOR_RED);
 		glPushMatrix();
-		glTranslated(-1.1, 3.4, -0.8);
-		drawBox(2.2, 3.1, 1.6);
-		glTranslated(1.05, -0.2, 0.7);
-		drawBox(0.2,0.2,0.2);
+		glTranslated(-5,0,-5);
+		drawBox(10,0.01f,10);
 		glPopMatrix();
 
-		//draw the beam
+
+
+		setAmbientColor(.1f, .1f, .1f);
+		setDiffuseColor(COLOR_GREEN);
 		glPushMatrix();
-		glTranslated(0, 3.0, 0);
-		glRotated(VAL(ROTATE), 0.0, 1.0, 0.0);
-		glRotated(90, 0.0, 1.0, 0.0);
-		glTranslated(0, 0, -1.25);		
-		drawCylinder(2.4, 0.25, 0.25);
-			//draw the left upper arm
+		glTranslated(VAL(XPOS), VAL(YPOS),VAL(ZPOS));
+		//draw the troso
 			glPushMatrix();
-			drawCylinder(0.2, 0.3, 0.3);
-			glTranslated(0.0, 0.0, 0.1);
-			glRotated(-90, 0.0, 1.0, 0.0);
-			glRotated(115, 1.0, 0.0, 0.0);				
-			drawCylinder(1.0,0.2,0.3);
-			glTranslated(0, 0, 1.2);
-
-				//draw the left lower arm
-				glPushMatrix();
-				drawSphere(0.25);
-				glRotated(-65, 1.0, 0.0, 0.0);
-				drawCylinder(1.65, 0.2, 0.2);
-				glTranslated(0.0,0.0,1.65);
-
-					//draw the right hand 
-					glPushMatrix();
-					drawSphere(0.2);
-					glTranslated(-0.25, 0, 0);
-					drawBox(0.1, 0.2, 0.4);
-					glTranslated(0.4, 0, 0);
-					drawBox(0.1, 0.2, 0.4);
-					glPopMatrix();
-				glPopMatrix();				
+			glTranslated(-1.1, 3.4, -0.8);
+			drawBox(2.2, 3.1, 1.6);
+			glTranslated(1.05, -0.2, 0.7);
+			drawBox(0.2,0.2,0.2);
 			glPopMatrix();
 
-		glTranslated(0, 0, 2.4);
-			//draw the right upper arm
+			//draw the beam
 			glPushMatrix();
-			drawCylinder(0.2, 0.3, 0.3);
-			glTranslated(0.0, 0.0, 0.1);
-			glRotated(-90, 0.0, 1.0, 0.0);
-			glRotated(115, 1.0, 0.0, 0.0);
-			drawCylinder(1.0, 0.2, 0.3);
-			glTranslated(0, 0, 1.2);
-
-				//draw the right lower arm
+			glTranslated(0, 3.0, 0);
+			glRotated(VAL(ROTATE), 0.0, 1.0, 0.0);
+			glRotated(90, 0.0, 1.0, 0.0);
+			glTranslated(0, 0, -1.25);		
+			drawCylinder(2.4, 0.25, 0.25);
+				//draw the left upper arm
 				glPushMatrix();
-				drawSphere(0.25);
-				glRotated(-65, 1.0, 0.0, 0.0);
-				drawCylinder(1.65, 0.2, 0.2);
-				glTranslated(0.0, 0.0, 1.65);
+				drawCylinder(0.2, 0.3, 0.3);
+				glTranslated(0.0, 0.0, 0.1);
+				glRotated(-90, 0.0, 1.0, 0.0);
+				glRotated(VAL(LEFTUPPERROTATE), 1.0, 0.0, 0.0);
+				glRotated(115, 1.0, 0.0, 0.0);				
+				drawCylinder(1.0,0.2,0.3);
+				glTranslated(0, 0, 1.2);
 
-					//draw the right hand 
+					//draw the left lower arm
 					glPushMatrix();
-					drawSphere(0.2);
-					glTranslated(-0.25, 0, 0);
-					drawBox(0.1, 0.2, 0.4);
-					glTranslated(0.4, 0, 0);
-					drawBox(0.1, 0.2, 0.4);
+					drawSphere(0.25);
+					glRotated(-65, 1.0, 0.0, 0.0);
+					drawCylinder(1.85, 0.2, 0.3);
+					glTranslated(0.0,0.0,1.85);
+
+						//draw the left hand 
+						glPushMatrix();
+						drawSphere(0.2);
+						glTranslated(-0.25, -0.05, 0);
+						drawBox(0.1, 0.2, 0.5);
+						glTranslated(0.4, 0, 0);
+						drawBox(0.1, 0.2, 0.5);
+						glPopMatrix();
+					glPopMatrix();				
+				glPopMatrix();
+
+			glTranslated(0, 0, 2.4);
+				//draw the right upper arm
+				glPushMatrix();
+				drawCylinder(0.2, 0.3, 0.3);
+				glTranslated(0.0, 0.0, 0.1);
+				glRotated(-90, 0.0, 1.0, 0.0);
+				glRotated(VAL(RIGHTUPPERROTATE), 1.0, 0.0, 0.0);
+				glRotated(115, 1.0, 0.0, 0.0);
+				drawCylinder(1.0, 0.2, 0.3);
+				glTranslated(0, 0, 1.2);
+
+					//draw the right lower arm
+					glPushMatrix();
+					drawSphere(0.25);
+					glRotated(-65, 1.0, 0.0, 0.0);
+					drawCylinder(1.85, 0.2, 0.3);
+					glTranslated(0.0, 0.0, 1.85);
+
+						//draw the right hand 
+						glPushMatrix();
+						drawSphere(0.2);
+						glTranslated(-0.25, -0.05, 0);
+						drawBox(0.1, 0.2, 0.5);
+						glTranslated(0.4, 0, 0);
+						drawBox(0.1, 0.2, 0.5);
+						glPopMatrix();
 					glPopMatrix();
 				glPopMatrix();
-			glPopMatrix();
 
+			glPopMatrix();
 		glPopMatrix();
-	glPopMatrix();
 
 
 	/*// draw the sample model
@@ -162,7 +166,8 @@ int main()
     controls[ZPOS] = ModelerControl("Z Position", -5, 5, 0.1f, 0);
     controls[HEIGHT] = ModelerControl("Height", 1, 2.5, 0.1f, 1);
 	controls[ROTATE] = ModelerControl("Rotate", -135, 135, 1, 0);
-
+	controls[LEFTUPPERROTATE] = ModelerControl("Left Upper Arm", -100, 60, 1, 0);
+	controls[RIGHTUPPERROTATE] = ModelerControl("Right Upper Arm", -100, 60, 1, 0);
     ModelerApplication::Instance()->Init(&createSampleModel, controls, NUMCONTROLS);
     return ModelerApplication::Instance()->Run();
 }

@@ -3,6 +3,7 @@
 #include <gl/glu.h>
 
 #include "camera.h"
+#include <math.h>
 
 #pragma warning(push)
 #pragma warning(disable : 4244)
@@ -178,9 +179,47 @@ void Camera::applyViewingTransform() {
 
 	// Place the camera at mPosition, aim the camera at
 	// mLookAt, and twist the camera such that mUpVector is up
-	gluLookAt(	mPosition[0], mPosition[1], mPosition[2],
-				mLookAt[0],   mLookAt[1],   mLookAt[2],
-				mUpVector[0], mUpVector[1], mUpVector[2]);
+	lookAt(	mPosition,mLookAt,mUpVector);
 }
 
+void Camera::lookAt(Vec3f eye, Vec3f at, Vec3f up) {
+	
+	
+	
+	Vec3f zaxis = normal(eye - at);   
+	Vec3f xaxis = normal(cross(up, zaxis));
+	Vec3f yaxis = cross(zaxis, xaxis);     
+
+	GLfloat M[] = {
+	   xaxis[0], yaxis[0], zaxis[0], 0,
+	   xaxis[1], yaxis[1], zaxis[1], 0,
+	   xaxis[2], yaxis[2], zaxis[2], 0,
+	   0,       0,       0,     1
+	};
+
+
+	glMultMatrixf(M);
+	glTranslated(-eye[0], -eye[1], -eye[2]);
+
+	
+}
+
+
+Vec3f Camera::cross(Vec3f a, Vec3f b) {
+	Vec3f r;
+	r[0] = a[1] * b[2] - a[2] * b[1];
+	r[1] = a[2] * b[0] - a[0] * b[2];
+	r[2] = a[0] * b[1] - a[1] * b[0];
+	return r;
+}
+
+Vec3f Camera::normal(Vec3f a) {
+	Vec3f r;
+
+	double l = sqrt(pow(a[0], 2) + pow(a[1], 2) + pow(a[2], 2));
+	r[0] = a[0] / l;
+	r[1] = a[1] / l;
+	r[2] = a[2] /l;
+	return r;
+}
 #pragma warning(pop)
