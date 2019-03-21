@@ -18,6 +18,7 @@ protected:
     float		mAzimuth;
     float		mDolly;
     float		mTwist; // Not implemented yet
+	static float curTwist;
     
     Vec3f		mLookAt;
     
@@ -86,6 +87,7 @@ public:
 
 	Vec3f cross(Vec3f a, Vec3f b);
 	Vec3f normal(Vec3f a);
+	void rotateUpVector();
 };
 
 #endif

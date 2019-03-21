@@ -11,6 +11,9 @@ static const int	kMouseRotationButton			= FL_LEFT_MOUSE;
 static const int	kMouseTranslationButton			= FL_MIDDLE_MOUSE;
 static const int	kMouseZoomButton				= FL_RIGHT_MOUSE;
 
+bool ModelerView::bTwist = false;
+bool ModelerView::bDrag = false;
+
 ModelerView::ModelerView(int x, int y, int w, int h, char *label)
 : Fl_Gl_Window(x,y,w,h,label)
 {
@@ -35,7 +38,13 @@ int ModelerView::handle(int event)
 			switch(eventButton)
 			{
 			case kMouseRotationButton:
-				m_camera->clickMouse(kActionRotate, eventCoordX, eventCoordY );
+				if(!bTwist)
+					m_camera->clickMouse(kActionRotate, eventCoordX, eventCoordY );
+				else {
+					//cout << "twist" << endl;
+					bTwist = false;
+					m_camera->clickMouse(kActionTwist, eventCoordX, eventCoordY);
+				}
 				break;
 			case kMouseTranslationButton:
 				m_camera->clickMouse(kActionTranslate, eventCoordX, eventCoordY );
@@ -49,6 +58,7 @@ int ModelerView::handle(int event)
 		break;
 	case FL_DRAG:
 		{
+			bDrag = true;
 			m_camera->dragMouse(eventCoordX, eventCoordY);
             //printf("drag %d %d\n", eventCoordX, eventCoordY);
 		}
@@ -58,10 +68,22 @@ int ModelerView::handle(int event)
 			switch(eventButton)
 			{
 			case kMouseRotationButton:
+				{
+					if (bDrag == false) {
+						bTwist = true;
+					}
+					bDrag = false;
+					m_camera->releaseMouse(eventCoordX, eventCoordY);
+					break;
+				}
 			case kMouseTranslationButton:
 			case kMouseZoomButton:
-				m_camera->releaseMouse(eventCoordX, eventCoordY );
-				break;
+				{
+					bTwist = false;
+					m_camera->releaseMouse(eventCoordX, eventCoordY);
+					bDrag = false;
+					break;
+				}
 			}
           //  printf("release %d %d\n", eventCoordX, eventCoordY);
 		}
@@ -77,8 +99,13 @@ int ModelerView::handle(int event)
 
 static GLfloat lightPosition0[] = { 4, 2, -4, 0 };
 static GLfloat lightDiffuse0[]  = { 1,1,1,1 };
-static GLfloat lightPosition1[] = { -2, 1, 5, 0 };
+static GLfloat lightSpecular0[] = { 0.5, 0.5, 0.7, 1 };
+static GLfloat lightPosition1[] = { -4, 2, 4, 0 };
 static GLfloat lightDiffuse1[]  = { 1, 1, 1, 1 };
+static GLfloat lightSpecular1[] = { 0.5, 0.5, 0.7, 1 };
+static GLfloat lightPosition2[] = { 4, 4, 5, 0 };
+static GLfloat lightDiffuse2[] = { 0.7, 1, 1, 1 };
+
 
 void ModelerView::draw()
 {
@@ -89,6 +116,7 @@ void ModelerView::draw()
         glEnable( GL_LIGHTING );
 		glEnable( GL_LIGHT0 );
         glEnable( GL_LIGHT1 );
+		//glEnable(GL_LIGHT2);
 		glEnable( GL_NORMALIZE );
     }
 
@@ -104,6 +132,10 @@ void ModelerView::draw()
 
     glLightfv( GL_LIGHT0, GL_POSITION, lightPosition0 );
     glLightfv( GL_LIGHT0, GL_DIFFUSE, lightDiffuse0 );
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular0);
     glLightfv( GL_LIGHT1, GL_POSITION, lightPosition1 );
     glLightfv( GL_LIGHT1, GL_DIFFUSE, lightDiffuse1 );
+	glLightfv(GL_LIGHT1, GL_SPECULAR, lightSpecular1);
+	//glLightfv(GL_LIGHT2, GL_POSITION, lightPosition2);
+	//glLightfv(GL_LIGHT2, GL_DIFFUSE, lightDiffuse2);
 }

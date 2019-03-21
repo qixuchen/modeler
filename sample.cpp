@@ -13,12 +13,13 @@ class SampleModel : public ModelerView
 {
 public:
     SampleModel(int x, int y, int w, int h, char *label) 
-        : ModelerView(x,y,w,h,label), leftIncrement(1), rightIncrement(-1){ }
+        : ModelerView(x,y,w,h,label), leftIncrement(1), rightIncrement(-1), rotationIncrement(1){ }
 
     virtual void draw();
 private:
 	int leftIncrement;
 	int rightIncrement;
+	int rotationIncrement;
 };
 
 // We need to make a creator function, mostly because of
@@ -41,6 +42,7 @@ void SampleModel::draw()
 		temp[1] = VAL(YPOS);
 		temp[2] = VAL(ZPOS);
 		this->m_camera->setLookAt(temp);
+		this->m_camera->setDolly(-30);
 		//this->m_camera->applyViewingTransform();
 	}
     ModelerView::draw();
@@ -48,6 +50,7 @@ void SampleModel::draw()
 	if (ModelerApplication::Instance()->animation()) {
 		int left = ModelerApplication::Instance()->GetControlValue(LEFTUPPERROTATE);
 		int right = ModelerApplication::Instance()->GetControlValue(RIGHTUPPERROTATE);
+		int rotation = VAL(ROTATE);
 		if (left == 60) {
 			leftIncrement = -1;
 		}
@@ -60,13 +63,16 @@ void SampleModel::draw()
 		if (right == -100) {
 			rightIncrement = 1;
 		}
-		int z = ModelerApplication::Instance()->GetControlValue(ZPOS);
-		if (left % 50 == 0) {
-			z++;
+		if (rotation == 135) {
+			rotationIncrement = -1;
+		}
+		if (rotation == -135) {
+			rotationIncrement = 1;
 		}
 		ModelerApplication::Instance()->SetControlValue(LEFTUPPERROTATE, left + leftIncrement);
 		ModelerApplication::Instance()->SetControlValue(RIGHTUPPERROTATE, right + rightIncrement);
-		ModelerApplication::Instance()->SetControlValue(ZPOS, z);
+		ModelerApplication::Instance()->SetControlValue(ROTATE, rotation + rotationIncrement);
+		//ModelerApplication::Instance()->SetControlValue(ZPOS, z);
 	}
 
 
@@ -82,6 +88,8 @@ void SampleModel::draw()
 
 		setAmbientColor(.1f, .1f, .1f);
 		setDiffuseColor(COLOR_GREEN);
+		setSpecularColor(0.4, 1, 0.4);
+		setShininess(30);
 		glPushMatrix();
 		glTranslated(VAL(XPOS), VAL(YPOS),VAL(ZPOS));
 		//draw the troso
@@ -212,10 +220,9 @@ int main()
 	// Constructor is ModelerControl(name, minimumvalue, maximumvalue, 
 	// stepsize, defaultvalue)
     ModelerControl controls[NUMCONTROLS];
-    controls[XPOS] = ModelerControl("X Position", -5, 5, 0.1f, 0);
-    controls[YPOS] = ModelerControl("Y Position", 0, 5, 0.1f, 0);
-    controls[ZPOS] = ModelerControl("Z Position", -5, 5, 0.1f, 0);
-    controls[HEIGHT] = ModelerControl("Height", 1, 2.5, 0.1f, 1);
+    controls[XPOS] = ModelerControl("X Position", -10, 10, 0.1f, 0);
+    controls[YPOS] = ModelerControl("Y Position", 0, 10, 0.1f, 0);
+    controls[ZPOS] = ModelerControl("Z Position", -10, 10, 0.1f, 0);
 	controls[ROTATE] = ModelerControl("Rotate", -135, 135, 1, 0);
 	controls[LEFTUPPERROTATE] = ModelerControl("Left Upper Arm", -100, 60, 1, -20);
 	controls[RIGHTUPPERROTATE] = ModelerControl("Right Upper Arm", -100, 60, 1, -20);
