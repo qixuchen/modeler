@@ -25,6 +25,8 @@ public:
     virtual void draw();
 
     Camera *m_camera;
+	static bool bTwist;
+	static bool bDrag;
 };
 
 

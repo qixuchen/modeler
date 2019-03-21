@@ -50,6 +50,9 @@ public:
     // Get and set slider values.
     double GetControlValue(int controlNumber);
     void   SetControlValue(int controlNumber, double value);
+	
+	// Added for PA2 
+	bool	animation();
 
 private:
 	// Private for singleton

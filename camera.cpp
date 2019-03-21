@@ -16,6 +16,8 @@ const float kMouseRotationSensitivity		= 1.0f/90.0f;
 const float kMouseTranslationXSensitivity	= 0.03f;
 const float kMouseTranslationYSensitivity	= 0.03f;
 const float kMouseZoomSensitivity			= 0.08f;
+const float kMouseTwistSensitivity = 0.08f;
+float Camera::curTwist = 0;
 
 void MakeDiagonal(Mat4f &m, float k)
 {
@@ -72,6 +74,8 @@ void MakeHRotZ(Mat4f &m, float theta)
 }
 
 
+
+
 void Camera::calculateViewingTransformParameters() 
 {
 	Mat4f dollyXform;
@@ -86,16 +90,21 @@ void Camera::calculateViewingTransformParameters()
 	MakeHRotY(azimXform, mAzimuth);
 	MakeHRotX(elevXform, mElevation);
 	MakeDiagonal(twistXform, 1.0f);
+	MakeHRotY(twistXform, mTwist);
 	MakeHTrans(originXform, mLookAt);
 	
 	mPosition = Vec3f(0,0,0);
 	// grouped for (mat4 * vec3) ops instead of (mat4 * mat4) ops
-	mPosition = originXform * (azimXform * (elevXform * (dollyXform * mPosition)));
+	mPosition = originXform *((azimXform * (elevXform * (dollyXform * mPosition))));
 
 	if ( fmod((double)mElevation, 2.0*M_PI) < 3*M_PI/2 && fmod((double)mElevation, 2.0*M_PI) > M_PI/2 )
 		mUpVector= Vec3f(0,-1,0);
 	else
 		mUpVector= Vec3f(0,1,0);
+	//cout << "reset vector" << endl;
+	// For the bell.
+	rotateUpVector();
+	//cout << "after reset vector" << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 
 	mDirtyTransform = false;
 }
@@ -103,8 +112,8 @@ void Camera::calculateViewingTransformParameters()
 Camera::Camera() 
 {
 	mElevation = mAzimuth = mTwist = 0.0f;
-	mDolly = -20.0f;
-	mElevation = 0.2f;
+	mDolly = -30.0f;
+	mElevation = 0.5f;
 	mAzimuth = (float)M_PI;
 
 	mLookAt = Vec3f( 0, 0, 0 );
@@ -134,32 +143,46 @@ void Camera::dragMouse( int x, int y )
 			double xTrack =  -mouseDelta[0] * kMouseTranslationXSensitivity;
 			double yTrack =  mouseDelta[1] * kMouseTranslationYSensitivity;
 
+			//cout << "vector" << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 			Vec3f transXAxis = mUpVector ^ (mPosition - mLookAt);
 			transXAxis /= sqrt((transXAxis*transXAxis));
 			Vec3f transYAxis = (mPosition - mLookAt) ^ transXAxis;
 			transYAxis /= sqrt((transYAxis*transYAxis));
 
 			setLookAt(getLookAt() + transXAxis*xTrack + transYAxis*yTrack);
-			
+			//cout << "vector2 " << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 			break;
 		}
 	case kActionRotate:
 		{
 			float dAzimuth		=   -mouseDelta[0] * kMouseRotationSensitivity;
 			float dElevation	=   mouseDelta[1] * kMouseRotationSensitivity;
-			
+			//cout << "vector" << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 			setAzimuth(getAzimuth() + dAzimuth);
 			setElevation(getElevation() + dElevation);
-			
+			//cout << "vector2 " << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 			break;
 		}
 	case kActionZoom:
 		{
 			float dDolly = -mouseDelta[1] * kMouseZoomSensitivity;
+			//cout << "vector" << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 			setDolly(getDolly() + dDolly);
+			//cout << "vector2 " << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
 			break;
 		}
 	case kActionTwist:
+		{
+			float angle = -mouseDelta[0] * kMouseTwistSensitivity;
+			float xnew = mUpVector[0] * cos(angle) - mUpVector[1] * sin(angle);
+			float ynew = mUpVector[0] * sin(angle) + mUpVector[1] * cos(angle);
+			mUpVector[0] = xnew;
+			mUpVector[1] = ynew;
+			normal(mUpVector);
+			curTwist += angle;
+			//cout << "twist vector" << mUpVector[0] << " " << mUpVector[1] << " " << mUpVector[2] << endl;
+			break;
+		}
 		// Not implemented
 	default:
 		break;
@@ -222,4 +245,15 @@ Vec3f Camera::normal(Vec3f a) {
 	r[2] = a[2] /l;
 	return r;
 }
+
+void Camera::rotateUpVector()
+{
+	float xnew = mUpVector[0] * cos(curTwist) - mUpVector[1] * sin(curTwist);
+	float ynew = mUpVector[0] * sin(curTwist) + mUpVector[1] * cos(curTwist);
+	mUpVector[0] = xnew;
+	mUpVector[1] = ynew;
+	normal(mUpVector);
+}
+
+
 #pragma warning(pop)

@@ -169,6 +169,7 @@ void ModelerApplication::HideControl(int controlNumber)
 void ModelerApplication::SliderCallback(Fl_Slider *, void *)
 {
     ModelerApplication::Instance()->m_ui->m_modelerView->redraw();
+	
 }
 
 void ModelerApplication::RedrawLoop(void*)
@@ -178,4 +179,9 @@ void ModelerApplication::RedrawLoop(void*)
 
 	// 1/50 second update is good enough
 	Fl::add_timeout(0.025, ModelerApplication::RedrawLoop, NULL);
+}
+
+// Added for PA2
+bool ModelerApplication::animation() {
+	return this->m_animating;
 }

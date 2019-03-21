@@ -5,7 +5,7 @@
 #include "modelerdraw.h"
 #include <FL/gl.h>
 #include "camera.h"
-
+#include "vec.h"
 #include "modelerglobals.h"
 
 // To make a SampleModel, we inherit off of ModelerView
@@ -13,9 +13,13 @@ class SampleModel : public ModelerView
 {
 public:
     SampleModel(int x, int y, int w, int h, char *label) 
-        : ModelerView(x,y,w,h,label) { }
+        : ModelerView(x,y,w,h,label), leftIncrement(1), rightIncrement(-1), rotationIncrement(1){ }
 
     virtual void draw();
+private:
+	int leftIncrement;
+	int rightIncrement;
+	int rotationIncrement;
 };
 
 // We need to make a creator function, mostly because of
@@ -32,10 +36,47 @@ void SampleModel::draw()
     // This call takes care of a lot of the nasty projection 
     // matrix stuff.  Unless you want to fudge directly with the 
 	// projection matrix, don't bother with this ...
+	if (ModelerApplication::Instance()->GetControlValue(FRAME_ALL) == 1) {
+		Vec3f temp = this->m_camera->getLookAt();
+		temp[0] = VAL(XPOS);
+		temp[1] = VAL(YPOS);
+		temp[2] = VAL(ZPOS);
+		this->m_camera->setLookAt(temp);
+		this->m_camera->setDolly(-30);
+		//this->m_camera->applyViewingTransform();
+	}
     ModelerView::draw();
 
-		// draw the floor
-		
+	if (ModelerApplication::Instance()->animation()) {
+		int left = ModelerApplication::Instance()->GetControlValue(LEFTUPPERROTATE);
+		int right = ModelerApplication::Instance()->GetControlValue(RIGHTUPPERROTATE);
+		int rotation = VAL(ROTATE);
+		if (left == 60) {
+			leftIncrement = -1;
+		}
+		if (left == -100) {
+			leftIncrement = 1;
+		}
+		if (right == 60) {
+			rightIncrement = -1;
+		}
+		if (right == -100) {
+			rightIncrement = 1;
+		}
+		if (rotation == 135) {
+			rotationIncrement = -1;
+		}
+		if (rotation == -135) {
+			rotationIncrement = 1;
+		}
+		ModelerApplication::Instance()->SetControlValue(LEFTUPPERROTATE, left + leftIncrement);
+		ModelerApplication::Instance()->SetControlValue(RIGHTUPPERROTATE, right + rightIncrement);
+		ModelerApplication::Instance()->SetControlValue(ROTATE, rotation + rotationIncrement);
+		//ModelerApplication::Instance()->SetControlValue(ZPOS, z);
+	}
+
+
+		// draw the floor	
 		setAmbientColor(.1f,.1f,.1f);
 		setDiffuseColor(COLOR_RED);
 		glPushMatrix();
@@ -47,6 +88,8 @@ void SampleModel::draw()
 
 		setAmbientColor(.1f, .1f, .1f);
 		setDiffuseColor(COLOR_GREEN);
+		setSpecularColor(0.4, 1, 0.4);
+		setShininess(30);
 		glPushMatrix();
 		glTranslated(VAL(XPOS), VAL(YPOS),VAL(ZPOS));
 		//draw the troso
@@ -62,32 +105,41 @@ void SampleModel::draw()
 			glTranslated(0, 3.0, 0);
 			glRotated(VAL(ROTATE), 0.0, 1.0, 0.0);
 			glRotated(90, 0.0, 1.0, 0.0);
-			glTranslated(0, 0, -1.25);		
-			drawCylinder(2.4, 0.25, 0.25);
+			glTranslated(0, 0, -1.25);
+			if (VAL(DETAILS) >= 1) {
+				drawCylinder(2.4, 0.25, 0.25);
+			}
 				//draw the left upper arm
 				glPushMatrix();
-				drawCylinder(0.2, 0.3, 0.3);
+				if(VAL(DETAILS) >= 2)
+					drawCylinder(0.2, 0.3, 0.3);
 				glTranslated(0.0, 0.0, 0.1);
 				glRotated(-90, 0.0, 1.0, 0.0);
 				glRotated(VAL(LEFTUPPERROTATE), 1.0, 0.0, 0.0);
-				glRotated(115, 1.0, 0.0, 0.0);				
-				drawCylinder(1.0,0.2,0.3);
+				glRotated(115, 1.0, 0.0, 0.0);		
+				if (VAL(DETAILS) >= 2)
+					drawCylinder(1.0,0.2,0.3);
 				glTranslated(0, 0, 1.2);
 
 					//draw the left lower arm
 					glPushMatrix();
-					drawSphere(0.25);
+					if (VAL(DETAILS) >= 3)
+						drawSphere(0.25);
 					glRotated(-65, 1.0, 0.0, 0.0);
-					drawCylinder(1.85, 0.2, 0.3);
+					if (VAL(DETAILS) >= 3)
+						drawCylinder(1.85, 0.2, 0.3);
 					glTranslated(0.0,0.0,1.85);
 
 						//draw the left hand 
 						glPushMatrix();
-						drawSphere(0.2);
+						if (VAL(DETAILS) >= 4)
+							drawSphere(0.2);
 						glTranslated(-0.25, -0.05, 0);
-						drawBox(0.1, 0.2, 0.5);
+						if (VAL(DETAILS) >= 4)
+							drawBox(0.1, 0.2, 0.5);
 						glTranslated(0.4, 0, 0);
-						drawBox(0.1, 0.2, 0.5);
+						if (VAL(DETAILS) >= 4)
+							drawBox(0.1, 0.2, 0.5);
 						glPopMatrix();
 					glPopMatrix();				
 				glPopMatrix();
@@ -95,28 +147,35 @@ void SampleModel::draw()
 			glTranslated(0, 0, 2.4);
 				//draw the right upper arm
 				glPushMatrix();
-				drawCylinder(0.2, 0.3, 0.3);
+				if (VAL(DETAILS) >= 2)
+					drawCylinder(0.2, 0.3, 0.3);
 				glTranslated(0.0, 0.0, 0.1);
 				glRotated(-90, 0.0, 1.0, 0.0);
 				glRotated(VAL(RIGHTUPPERROTATE), 1.0, 0.0, 0.0);
 				glRotated(115, 1.0, 0.0, 0.0);
-				drawCylinder(1.0, 0.2, 0.3);
+				if (VAL(DETAILS) >= 2)
+					drawCylinder(1.0, 0.2, 0.3);
 				glTranslated(0, 0, 1.2);
 
 					//draw the right lower arm
 					glPushMatrix();
-					drawSphere(0.25);
+					if (VAL(DETAILS) >= 3)
+						drawSphere(0.25);
 					glRotated(-65, 1.0, 0.0, 0.0);
-					drawCylinder(1.85, 0.2, 0.3);
+					if (VAL(DETAILS) >= 3)
+						drawCylinder(1.85, 0.2, 0.3);
 					glTranslated(0.0, 0.0, 1.85);
 
 						//draw the right hand 
 						glPushMatrix();
-						drawSphere(0.2);
+						if (VAL(DETAILS) >= 4)
+							drawSphere(0.2);
 						glTranslated(-0.25, -0.05, 0);
-						drawBox(0.1, 0.2, 0.5);
+						if (VAL(DETAILS) >= 4)
+							drawBox(0.1, 0.2, 0.5);
 						glTranslated(0.4, 0, 0);
-						drawBox(0.1, 0.2, 0.5);
+						if (VAL(DETAILS) >= 4)
+							drawBox(0.1, 0.2, 0.5);
 						glPopMatrix();
 					glPopMatrix();
 				glPopMatrix();
@@ -161,13 +220,14 @@ int main()
 	// Constructor is ModelerControl(name, minimumvalue, maximumvalue, 
 	// stepsize, defaultvalue)
     ModelerControl controls[NUMCONTROLS];
-    controls[XPOS] = ModelerControl("X Position", -5, 5, 0.1f, 0);
-    controls[YPOS] = ModelerControl("Y Position", 0, 5, 0.1f, 0);
-    controls[ZPOS] = ModelerControl("Z Position", -5, 5, 0.1f, 0);
-    controls[HEIGHT] = ModelerControl("Height", 1, 2.5, 0.1f, 1);
+    controls[XPOS] = ModelerControl("X Position", -10, 10, 0.1f, 0);
+    controls[YPOS] = ModelerControl("Y Position", 0, 10, 0.1f, 0);
+    controls[ZPOS] = ModelerControl("Z Position", -10, 10, 0.1f, 0);
 	controls[ROTATE] = ModelerControl("Rotate", -135, 135, 1, 0);
-	controls[LEFTUPPERROTATE] = ModelerControl("Left Upper Arm", -100, 60, 1, 0);
-	controls[RIGHTUPPERROTATE] = ModelerControl("Right Upper Arm", -100, 60, 1, 0);
+	controls[LEFTUPPERROTATE] = ModelerControl("Left Upper Arm", -100, 60, 1, -20);
+	controls[RIGHTUPPERROTATE] = ModelerControl("Right Upper Arm", -100, 60, 1, -20);
+	controls[DETAILS] = ModelerControl("Level of details", 0, 4, 1, 4);
+	controls[FRAME_ALL] = ModelerControl("Frame all", 0, 1, 1, 0);
     ModelerApplication::Instance()->Init(&createSampleModel, controls, NUMCONTROLS);
     return ModelerApplication::Instance()->Run();
 }
