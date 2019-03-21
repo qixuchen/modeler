@@ -173,7 +173,7 @@ void Camera::dragMouse( int x, int y )
 		}
 	case kActionTwist:
 		{
-			float angle = -mouseDelta[0] * kMouseTwistSensitivity;
+			float angle = mouseDelta[0] * kMouseTwistSensitivity;
 			float xnew = mUpVector[0] * cos(angle) - mUpVector[1] * sin(angle);
 			float ynew = mUpVector[0] * sin(angle) + mUpVector[1] * cos(angle);
 			mUpVector[0] = xnew;
